@@ -1,6 +1,7 @@
 # Docker Nginx for Ruby APP
 Docker Nginx for Ruby APP. No Configuration, No files.
-Just Run Docker and Your Ruby APP's Ready for `localhost:80`
+
+Just Run Docker and Your Ruby APP's Ready for localhost.
 
 <p align="center">
 
@@ -15,16 +16,18 @@ Just Run Docker and Your Ruby APP's Ready for `localhost:80`
 - [Docker](https://www.docker.com/)
 
 
+
 ## Usage
 
 1. Create Docker Network
 
-```ruby
-  docker create network shared
+```
+  docker network create --driver bridge shared
 ```
 
+
 2. Run Ruby APP
-```ruby
+```
   docker run -d --name web \
       -p 3000:3000 \
       --network shared \
@@ -35,7 +38,7 @@ Just Run Docker and Your Ruby APP's Ready for `localhost:80`
 
 3. Run ruby-nginx Container
 
-```ruby
+```
   docker run -d --name nginx \
       -e VIRTUAL_HOST=el-soul.com \
       -e LETSENCRYPT_HOST=el-soul.com \
@@ -48,7 +51,68 @@ Just Run Docker and Your Ruby APP's Ready for `localhost:80`
 ※You can set your domain in case you need SSL in your future.
 
 
+Now you can see your app;
+
 [http://localhost](http://localhost)
+
+
+## HTTPS / SSL (Optional)
+
+4. Create  Proxy 
+
+```
+  docker run -d --name proxy \
+      -p 80:80 -p 443:443 \
+      -v "/var/run/docker.sock:/tmp/docker.sock:ro" \
+      -v "/home/certs:/etc/nginx/certs:ro" \
+      -v "/etc/nginx/vhost.d" \
+      -v "/usr/share/nginx/html" \
+      --network shared \
+      --restart always \
+      jwilder/nginx-proxy
+```
+
+
+5. Create Let's Encrtypt
+
+```
+  docker run -d --name letsencrypt \
+      -v "/home/certs:/etc/nginx/certs" \
+      -v "/var/run/docker.sock:/var/run/docker.sock:ro" \
+      --volumes-from proxy \
+      --network shared \
+      --restart always \
+      jrcs/letsencrypt-nginx-proxy-companion
+```
+
+Check docker
+
+```
+  docker ps
+```
+
+You can see 4 containers running
+
+```
+CONTAINER ID        IMAGE                                    COMMAND                  CREATED             STATUS              PORTS                                      NAMES
+608cb6742535        poppinfumi/ruby-nginx:latest             "nginx -g 'daemon of…"   2 hours ago         Up 2 hours          80/tcp                                     nginx
+029b2052c2c8        poppinfumi/souls_api:latest              "foreman start"          3 hours ago         Up 3 hours          0.0.0.0:3000->3000/tcp                     web
+5445e369dc7d        jrcs/letsencrypt-nginx-proxy-companion   "/bin/bash /app/entr…"   5 hours ago         Up 5 hours                                                     letsencrypt
+67dc0f4622dc        jwilder/nginx-proxy                      "/app/docker-entrypo…"   5 hours ago         Up 5 hours          0.0.0.0:80->80/tcp, 0.0.0.0:443->443/tcp   proxy
+```
+
+
+
+Now Your Ruby APP on HTTPS
+
+
+[https://el-soul.com](https://el-soul.com)
+
+
+
+※You need to do DNS settings with your domain
+
+
 
 
 ## Contributing
