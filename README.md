@@ -22,16 +22,16 @@ Just Run Docker and Your Ruby APP's Ready for localhost.
 1. Create Docker Network
 
 ```
-  docker network create --driver bridge shared
+docker network create --driver bridge shared
 ```
 
 
 2. Run Ruby APP
 ```
-  docker run -d --name web \
-      -p 3000:3000 \
-      --network shared \
-      poppinfumi/ruby-nginx:latest
+docker run -d --name web \
+    -p 3000:3000 \
+    --network shared \
+    poppinfumi/ruby-nginx:latest
 ```
 
 ※docker run option arguments are fixed
@@ -39,13 +39,13 @@ Just Run Docker and Your Ruby APP's Ready for localhost.
 3. Run ruby-nginx Container
 
 ```
-  docker run -d --name nginx \
-      -e VIRTUAL_HOST=el-soul.com \
-      -e LETSENCRYPT_HOST=el-soul.com \
-      -e LETSENCRYPT_EMAIL=info@gmail \
-      --network shared \
-      --link web \
-      poppinfumi/ruby-nginx:latest
+docker run -d --name nginx \
+    -e VIRTUAL_HOST=el-soul.com \
+    -e LETSENCRYPT_HOST=el-soul.com \
+    -e LETSENCRYPT_EMAIL=info@gmail \
+    --network shared \
+    --link web \
+    poppinfumi/souls_api:latest
 ```
 
 ※You can set your domain in case you need SSL in your future.
@@ -61,34 +61,34 @@ Now you can see your app;
 4. Create  Proxy 
 
 ```
-  docker run -d --name proxy \
-      -p 80:80 -p 443:443 \
-      -v "/var/run/docker.sock:/tmp/docker.sock:ro" \
-      -v "/home/certs:/etc/nginx/certs:ro" \
-      -v "/etc/nginx/vhost.d" \
-      -v "/usr/share/nginx/html" \
-      --network shared \
-      --restart always \
-      jwilder/nginx-proxy
+docker run -d --name proxy \
+    -p 80:80 -p 443:443 \
+    -v "/var/run/docker.sock:/tmp/docker.sock:ro" \
+    -v "/home/certs:/etc/nginx/certs:ro" \
+    -v "/etc/nginx/vhost.d" \
+    -v "/usr/share/nginx/html" \
+    --network shared \
+    --restart always \
+    jwilder/nginx-proxy
 ```
 
 
 5. Create Let's Encrtypt
 
 ```
-  docker run -d --name letsencrypt \
-      -v "/home/certs:/etc/nginx/certs" \
-      -v "/var/run/docker.sock:/var/run/docker.sock:ro" \
-      --volumes-from proxy \
-      --network shared \
-      --restart always \
-      jrcs/letsencrypt-nginx-proxy-companion
+docker run -d --name letsencrypt \
+    -v "/home/certs:/etc/nginx/certs" \
+    -v "/var/run/docker.sock:/var/run/docker.sock:ro" \
+    --volumes-from proxy \
+    --network shared \
+    --restart always \
+    jrcs/letsencrypt-nginx-proxy-companion
 ```
 
-Check docker
+Check Docker Containers
 
 ```
-  docker ps
+docker ps
 ```
 
 You can see 4 containers running
